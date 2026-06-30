@@ -22,8 +22,8 @@ npm run dev
 ```
 
 This will run:
-- frontend at http://localhost:3000
-- backend at http://localhost:5000
+- frontend at http://localhost:3000/
+- backend at http://localhost:5000/
 
 ## Backend API
 
