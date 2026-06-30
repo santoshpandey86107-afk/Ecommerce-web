@@ -36,9 +36,3 @@ This will run:
 - POST /api/orders
 - GET /api/orders/my
 - GET /api/payment/config
-
-## Deployment
-
-- Frontend: deploy the frontend folder to Vercel or Netlify
-- Backend: deploy the backend folder to Render or Railway
-- Set the frontend API base URL to your deployed backend URL
