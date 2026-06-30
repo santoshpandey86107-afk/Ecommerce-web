@@ -7,20 +7,6 @@ A full-stack ecommerce storefront with a React frontend and an Express backend.
 - frontend: Vite + React storefront
 - backend: Express API for products, auth, and orders
 
-## Run locally
-
-### 1. Install dependencies
-
-```bash
-npm install
-```
-
-### 2. Start both apps
-
-```bash
-npm run dev
-```
-
 This will run:
 - frontend at http://localhost:3000/
 - backend at http://localhost:5000/
