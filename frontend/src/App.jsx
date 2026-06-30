@@ -20,6 +20,21 @@ const COLORS = {
   tagText: '#1D4ED8'
 };
 
+const FALLBACK_PRODUCTS = [
+  { id: 1, name: 'Wireless Noise-Cancelling Headphones', price: 249.99, originalPrice: 329.99, category: 'Electronics', rating: 4.8, reviews: 2341, stock: 12, image: '🎧', description: 'Premium over-ear headphones with 30-hour battery life, active noise cancellation, and crystal-clear audio.', tags: ['bestseller', 'new'] },
+  { id: 2, name: 'Merino Wool Crew Sweater', price: 89.00, originalPrice: null, category: 'Clothing', rating: 4.6, reviews: 876, stock: 34, image: '🧥', description: 'Soft, breathable merino wool in a classic crew-neck silhouette. Perfect for layering in any season.', tags: [] },
+  { id: 3, name: 'Smart Indoor Garden Kit', price: 149.95, originalPrice: 179.95, category: 'Home & Garden', rating: 4.7, reviews: 512, stock: 8, image: '🌿', description: 'Grow herbs and greens year-round with automated lighting and watering. Includes seed pods for 12 plants.', tags: ['new'] },
+  { id: 4, name: 'Carbon Fiber Road Bicycle Helmet', price: 119.00, originalPrice: null, category: 'Sports', rating: 4.9, reviews: 1203, stock: 20, image: '🚴', description: 'Aerodynamic, lightweight helmet with MIPS technology and 22 ventilation channels. Road-tested safety.', tags: ['bestseller'] },
+  { id: 5, name: 'Design Thinking Handbook', price: 34.99, originalPrice: 44.99, category: 'Books', rating: 4.5, reviews: 389, stock: 50, image: '📚', description: 'A practical guide to applying design thinking in business and product development. Written by IDEO veterans.', tags: [] },
+  { id: 6, name: 'Mechanical Gaming Keyboard', price: 159.00, originalPrice: 199.00, category: 'Electronics', rating: 4.7, reviews: 1580, stock: 15, image: '⌨️', description: 'Compact TKL layout with tactile switches, per-key RGB lighting, and USB-C braided cable.', tags: ['bestseller'] },
+  { id: 7, name: 'Yoga Mat Pro (6mm)', price: 68.00, originalPrice: null, category: 'Sports', rating: 4.6, reviews: 732, stock: 40, image: '🧘', description: 'Non-slip, eco-friendly natural rubber yoga mat with alignment lines and a microfiber top surface.', tags: [] },
+  { id: 8, name: 'Linen Blend Chinos', price: 75.00, originalPrice: 95.00, category: 'Clothing', rating: 4.4, reviews: 445, stock: 22, image: '👖', description: 'Relaxed fit chinos in a breathable linen-cotton blend. Available in neutral tones.', tags: [] },
+  { id: 9, name: 'Cast Iron Dutch Oven (6 qt)', price: 89.95, originalPrice: 120.00, category: 'Home & Garden', rating: 4.9, reviews: 2100, stock: 18, image: '🍲', description: 'Enameled cast iron for oven, stovetop, and outdoor use. Even heat distribution for perfect braises.', tags: ['bestseller'] },
+  { id: 10, name: '4K Action Camera', price: 299.00, originalPrice: 349.00, category: 'Electronics', rating: 4.8, reviews: 924, stock: 7, image: '📷', description: 'Waterproof to 40m, 4K/60fps video, 20MP photos, HyperSmooth stabilization, and voice control.', tags: ['new'] },
+  { id: 11, name: 'Graphic Novel: The Quiet Universe', price: 22.00, originalPrice: null, category: 'Books', rating: 4.7, reviews: 214, stock: 30, image: '📖', description: 'Award-winning sci-fi graphic novel exploring isolation, connection, and identity across the cosmos.', tags: ['new'] },
+  { id: 12, name: 'Stainless Steel Water Bottle (32oz)', price: 39.95, originalPrice: null, category: 'Sports', rating: 4.8, reviews: 3421, stock: 60, image: '🍶', description: 'Double-wall vacuum insulated. Keeps drinks cold 24h, hot 12h. Leak-proof lid, BPA-free.', tags: ['bestseller'] }
+];
+
 const styleEl = document.createElement('style');
 styleEl.textContent = `
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -367,6 +382,7 @@ export default function App() {
   const [cartOpen, setCartOpen] = useState(false);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [checkoutForm, setCheckoutForm] = useState({ fullName: '', address: '', city: 'Demo City', zip: '', country: 'US' });
   const [checkoutMessage, setCheckoutMessage] = useState('');
   const [checkoutLoading, setCheckoutLoading] = useState(false);
@@ -385,8 +401,14 @@ export default function App() {
     const loadData = async () => {
       try {
         const response = await fetch(getApiUrl('api/products'));
-        const data = await response.json();
-        setProducts(data.products || []);
+        const data = response.ok ? await response.json() : null;
+        const loadedProducts = data?.products?.length ? data.products : FALLBACK_PRODUCTS;
+        setProducts(loadedProducts);
+
+        if (!data?.products?.length) {
+          setLoadError('Products are currently unavailable from the backend. Showing local demo products.');
+        }
+
         if (token) {
           const profileResponse = await fetch(getApiUrl('api/auth/me'), { headers: { Authorization: `Bearer ${token}` } });
           if (profileResponse.ok) {
@@ -401,6 +423,8 @@ export default function App() {
         }
       } catch (error) {
         console.error(error);
+        setLoadError('Products are currently unavailable from the backend. Showing local demo products.');
+        setProducts(FALLBACK_PRODUCTS);
       } finally {
         setLoading(false);
       }
@@ -476,6 +500,11 @@ export default function App() {
   return (
     <div>
       <Navbar user={user} onSignOut={handleSignOut} cartCount={cart.reduce((sum, item) => sum + item.qty, 0)} onOpenCart={() => setCartOpen(true)} onNavigate={setView} />
+      {loadError && (
+        <div style={{ maxWidth: 1200, margin: '16px auto', padding: 14, background: '#FFF4E5', color: '#92400E', border: '1px solid #FCD34D', borderRadius: 14, fontSize: 14 }}>
+          {loadError}
+        </div>
+      )}
       {loading ? <div style={{ padding: 24, textAlign: 'center' }}>Loading ShopWave…</div> : (
         <>
           {view === 'auth' && <AuthView onAuthSuccess={handleAuthSuccess} />}

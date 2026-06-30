@@ -10,8 +10,15 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'shopwave-dev-secret';
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
+const ALLOWED_ORIGINS = [CLIENT_URL, 'http://127.0.0.1:3000', 'http://localhost:5173', 'http://127.0.0.1:5173'];
 
-app.use(cors({ origin: CLIENT_URL }));
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS origin denied: ${origin}`));
+  }
+}));
+app.options('*', cors());
 app.use(express.json());
 
 const products = [
